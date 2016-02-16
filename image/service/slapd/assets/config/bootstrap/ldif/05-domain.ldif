@@ -1,0 +1,15 @@
+dn: {{ LDAP_BASE_DN }}
+changetype: add
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+dc: {{ LDAP_DOMAIN_RDC }}
+o: {{ LDAP_ORGANISATION }}
+
+dn: cn=admin,{{ LDAP_BASE_DN }}
+changetype: add
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: admin
+description: LDAP administrator
+userPassword: {{ LDAP_ADMIN_PASSWORD_ENCRYPTED }}

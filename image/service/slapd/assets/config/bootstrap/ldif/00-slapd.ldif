@@ -98,7 +98,7 @@ olcDatabase: config
 olcRootPW: {{ LDAP_CONFIG_PASSWORD_ENCRYPTED }}
 #
 # Allow unlimited access to local connection from the local root user
-olcAccess: {0}to * by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage by * break
+olcAccess: to * by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage by * break
 
 #
 # BACKENDS
@@ -118,4 +118,17 @@ olcSuffix: {{ LDAP_BASE_DN }}
 olcDbDirectory: {{ LDAP_BACKEND_DIR }}
 olcRootDN: cn=admin,{{ LDAP_BASE_DN }}
 olcRootPW: {{ LDAP_ADMIN_PASSWORD_ENCRYPTED }}
-olcAccess: {0}to * by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage by * break
+# BACKEND ACCESS
+olcAccess: to * by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage by * break
+olcAccess: to attrs=userPassword,shadowLastChange
+  by self write
+  by anonymous auth
+  by dn="cn=admin,{{ LDAP_BASE_DN }}" write
+  by group/organizationalRole/roleOccupant="cn=admin,{{ LDAP_BASE_DN }}" write
+  by * none
+olcAccess: to dn.base="" by * read
+olcAccess: to *
+  by self write
+  by dn="cn=admin,{{ LDAP_BASE_DN }}" write
+  by group/organizationalRole/roleOccupant="cn=admin,{{ LDAP_BASE_DN }}" write
+  by * read
