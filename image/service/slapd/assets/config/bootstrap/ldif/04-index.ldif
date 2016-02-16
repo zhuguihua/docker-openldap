@@ -1,9 +1,14 @@
 # Add indexes
-dn: olcDatabase={1}hdb,cn=config
+dn: olcDatabase={1}{{ LDAP_BACKEND_DATABASE }},cn=config
 changetype:  modify
 replace: olcDbIndex
-olcDbIndex: uid eq
-olcDbIndex: mail eq
+olcDbIndex: cn pres,eq,approx,sub
+olcDbIndex: uid pres,eq,approx,sub
+olcDbIndex: dc pres,eq
+olcDbIndex: l pres,eq
+olcDbIndex: o pres,eq
+olcDbIndex: mail pres,eq,approx,sub
+olcDbIndex: sn pres,eq,approx,sub
 olcDbIndex: memberOf eq
 olcDbIndex: entryCSN eq
 olcDbIndex: entryUUID eq

@@ -1,0 +1,16 @@
+dn: cn=module{0},cn=config
+changetype: modify
+add: olcModuleLoad
+olcModuleLoad: refint
+
+# BACKEND REFINT OVERLAY
+dn: olcOverlay={1}refint,olcDatabase={1}{{ LDAP_BACKEND_DATABASE }},cn=config
+changetype: add
+objectClass: olcOverlayConfig
+objectClass: olcRefintConfig
+olcOverlay: {1}refint
+olcRefintAttribute: owner
+olcRefintAttribute: manager
+olcRefintAttribute: uniqueMember
+olcRefintAttribute: member
+olcRefintAttribute: memberOf

@@ -9,16 +9,16 @@ SCHEMAS=$1
 tmpd=`mktemp -d`
 pushd ${tmpd} >>/dev/null
 
-echo "include /etc/ldap/schema/core.schema" >> convert.dat
-echo "include /etc/ldap/schema/cosine.schema" >> convert.dat
-echo "include /etc/ldap/schema/nis.schema" >> convert.dat
-echo "include /etc/ldap/schema/inetorgperson.schema" >> convert.dat
+echo "include /etc/openldap/schema/core.schema" >> convert.dat
+echo "include /etc/openldap/schema/cosine.schema" >> convert.dat
+echo "include /etc/openldap/schema/nis.schema" >> convert.dat
+echo "include /etc/openldap/schema/inetorgperson.schema" >> convert.dat
 
 for schema in ${SCHEMAS} ; do
     echo "include ${schema}" >> convert.dat
 done
 
-slaptest -f convert.dat -F .
+slaptest -f convert.dat -F .  2>&1 | log-helper debug
 
 if [ $? -ne 0 ] ; then
     log-helper error "slaptest conversion failed"

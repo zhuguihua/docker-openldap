@@ -4,7 +4,7 @@ FROM osixia/light-baseimage:0.3.0
 MAINTAINER Bertrand Gouny <bertrand.gouny@osixia.net>
 
 # Add openldap user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
-RUN addgroup openldap && adduser -S openldap -G openldap
+RUN addgroup ldap && adduser -S ldap -G ldap
 
 # Install OpenLDAP, ldap-utils and cfssl from baseimage
 # sources: https://github.com/osixia/docker-light-baseimage/blob/stable/image/tool/add-service-available
@@ -31,7 +31,7 @@ RUN /container/tool/install-service
 ADD environment /container/environment/99-default
 
 # Set OpenLDAP data and config directories in a data volume
-VOLUME ["/var/lib/ldap", "/etc/ldap/slapd.d"]
+VOLUME ["/var/lib/openldap", "/etc/openldap/slapd.d"]
 
 # Expose default ldap and ldaps ports
 EXPOSE 389 636
