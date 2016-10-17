@@ -10,7 +10,7 @@ RUN addgroup ldap && adduser -S ldap -G ldap
 # sources: https://github.com/osixia/docker-light-baseimage/blob/stable/image/tool/add-service-available
 #          https://github.com/osixia/docker-light-baseimage/blob/stable/image/service-available/:ssl-tools/download.sh
 RUN apk update \
-    && /container/tool/add-service-available :cfssl \
+    && /container/tool/add-service-available :ssl-tools \
 	  && apk add \
        openldap \
        openldap-back-bdb \
