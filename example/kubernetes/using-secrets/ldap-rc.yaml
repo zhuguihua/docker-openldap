@@ -15,9 +15,8 @@ spec:
     spec:
       containers:
         - name: ldap
-          image: osixia/openldap:1.1.1
-          command:
-          - --copy-service
+          image: osixia/openldap:1.1.6
+          args: ["--copy-service"]
           volumeMounts:
             - name: ldap-data
               mountPath: /var/lib/ldap
@@ -33,7 +32,7 @@ spec:
             - containerPort: 389
               name: openldap
         - name: ldap-backup
-          image: osixia/openldap-backup:0.1.8
+          image: osixia/openldap-backup:0.1.11
           volumeMounts:
             - name: ldap-data
               mountPath: /var/lib/ldap

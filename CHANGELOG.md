@@ -1,11 +1,57 @@
 # Changelog
 
+## 1.1.6
+Fix :
+  - Upgrade to 1.1.5 startup issues with cfssl-helper #73
+
+Update to light-baseimage:0.2.5
+
+## 1.1.5
+Fix :
+  - Restarting container with new environment #44
+  - Cannot rerun with customized certificate at 1.1.1 #36
+
+## 1.1.4
+Fix :
+  - Remove environment variable LDAP_TLS_PROTOCOL_MIN as it takes no effect, see #69
+  - Adjust default GnuTLS cipher string according to Red Hat's TLS hardening guide.
+    This by default also restricts the TLS protocol version to 1.2. For reference,
+    see #69
+  - Fix Error in Adding "Billy" #71
+  - Add docker-compose.yml example and update kubernetes examples #52
+
+Merge pull request :
+  - Update LDAP_TLS_CIPHER_SUITE, remove LDAP_TLS_PROTOCOL_MIN #70
+  - fixed LDAP_BACKEND for readonly user #62
+
+## 1.1.3
+Merge pull request :
+  - Use mdb over hdb #50
+  - Ignore lost+found directories #53
+  - Remove Volume command from Dockerfile #56
+
+Update to light-baseimage:0.2.4
+
+Release Note:
+  In this version the new environment variable LDAP_BACKEND let you set the the backend used by your ldap database.
+  By default it's hdb. In comming versions 1.2.x the default will be changed to mdb.
+
+  Environment variable LDAP_REPLICATION_HDB_SYNCPROV changed to LDAP_REPLICATION_DB_SYNCPROV
+
+## 1.1.2
+Merge pull request :
+  - Honor LDAP_LOG_LEVEL on startup #39
+
+Fix :
+  - slapd tcp bind is network not interface, and so does not respond on overlay networks #35
+  - specify base_dn without domain #37
+
 ## 1.1.1
 Update to light-baseimage:0.2.2
 
 ## 1.1.0
 Update to light-baseimage:0.2.1 :
-  - Use \*.yaml.startup environment files to keep configuration secrets
+  - Use \*.startup.yaml environment files to keep configuration secrets
   - Use cfssl tool to generate tls certs
   - Use log-helper to write leveled log messages
   - Allow copy of /container/service and mounted files to /container/run/service dir usefull for write only filesystems and avoid file permissions problems

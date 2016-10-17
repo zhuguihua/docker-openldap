@@ -1,14 +1,14 @@
 # Use osixia/light-baseimage
 # sources: https://github.com/osixia/docker-light-baseimage
-FROM osixia/light-baseimage:0.3.0
+FROM osixia/alpine-light-baseimage:0.1.0
 MAINTAINER Bertrand Gouny <bertrand.gouny@osixia.net>
 
 # Add openldap user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN addgroup ldap && adduser -S ldap -G ldap
 
-# Install OpenLDAP, ldap-utils and cfssl from baseimage
+# Install OpenLDAP, ldap-utils and ssl-tools from baseimage and clean apt-get files
 # sources: https://github.com/osixia/docker-light-baseimage/blob/stable/image/tool/add-service-available
-#          https://github.com/osixia/docker-light-baseimage/blob/stable/image/service-available/:cfssl/download.sh
+#          https://github.com/osixia/docker-light-baseimage/blob/stable/image/service-available/:ssl-tools/download.sh
 RUN apk update \
     && /container/tool/add-service-available :cfssl \
 	  && apk add \
@@ -23,15 +23,12 @@ RUN apk update \
 # Add service directory to /container/service
 ADD service /container/service
 
-# Use baseimage install-service script and clean all
+# Use baseimage install-service script
 # https://github.com/osixia/docker-light-baseimage/blob/stable/image/tool/install-service
 RUN /container/tool/install-service
 
 # Add default env variables
 ADD environment /container/environment/99-default
-
-# Set OpenLDAP data and config directories in a data volume
-VOLUME ["/var/lib/openldap", "/etc/openldap/slapd.d"]
 
 # Expose default ldap and ldaps ports
 EXPOSE 389 636
