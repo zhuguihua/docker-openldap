@@ -14,18 +14,24 @@ LDAP_ETC_DIR="/etc/openldap"
 LDAP_CONFIG_DIR="$LDAP_ETC_DIR/slapd.d"
 LDAP_BACKEND_DIR="/var/lib/openldap"
 LDAP_MODULES_DIR="/usr/lib/openldap"
-
 LDAP_RUN_DIR="/var/run/openldap"
 LDAP_RUN_PIDFILE="$LDAP_RUN_DIR/slapd.pid"
 LDAP_RUN_ARGSFILE="$LDAP_RUN_DIR/slapd.args"
 
 # create dir if they not already exists
-[ -d ${LDAP_BACKEND_DIR} ] || mkdir -p ${LDAP_BACKEND_DIR}
+[ -d ${LDAP_ETC_DIR} ] || mkdir -p ${LDAP_ETC_DIR}
 [ -d ${LDAP_CONFIG_DIR} ] || mkdir -p ${LDAP_CONFIG_DIR}
+[ -d ${LDAP_BACKEND_DIR} ] || mkdir -p ${LDAP_BACKEND_DIR}
+[ -d ${LDAP_MODULES_DIR} ] || mkdir -p ${LDAP_MODULES_DIR}
+[ -d ${LDAP_RUN_DIR} ] || mkdir -p ${LDAP_RUN_DIR}
 
 # fix file permissions
-  chown -R ldap:ldap ${LDAP_BACKEND_DIR} ${LDAP_CONFIG_DIR} ${LDAP_RUN_DIR}
-  chown -R ldap:ldap ${CONTAINER_SERVICE_DIR}/slapd
+function fix_file_permissions() {
+chown -R ldap:ldap ${LDAP_ETC_DIR} ${LDAP_CONFIG_DIR} ${LDAP_BACKEND_DIR} ${LDAP_MODULES_DIR} ${LDAP_RUN_DIR}
+chown -R ldap:ldap ${CONTAINER_SERVICE_DIR}/slapd
+}
+
+fix_file_permissions
 
 FIRST_START_DONE="${CONTAINER_STATE_DIR}/slapd-first-start-done"
 WAS_STARTED_WITH_TLS="${LDAP_CONFIG_DIR}/docker-openldap-was-started-with-tls"
@@ -73,7 +79,7 @@ if [ ! -e "$FIRST_START_DONE" ]; then
   # database and config directory are empty
   # setup bootstrap config - Part 1
   #
-  if [ -z "$(ls -A -I lost+found ${LDAP_BACKEND_DIR})" ] && [ -z "$(ls -A -I lost+found ${LDAP_CONFIG_DIR})" ]; then
+  if [ -z "$(ls -A ${LDAP_BACKEND_DIR} | sed  "s/lost+found//")" ] && [ -z "$(ls -A ${LDAP_CONFIG_DIR} | sed  "s/lost+found//")" ]; then
 
     BOOTSTRAP=true
     log-helper info "Database and config directory are empty..."
@@ -108,14 +114,14 @@ if [ ! -e "$FIRST_START_DONE" ]; then
   #
   # Error: the database directory is empty but not the config directory
   #
-  elif [ -z "$(ls -A ${LDAP_BACKEND_DIR})" ] && [ ! -z "$(ls -A ${LDAP_CONFIG_DIR})" ]; then
+  elif [ -z "$(ls -A ${LDAP_BACKEND_DIR} | sed  "s/lost+found//")" ] && [ ! -z "$(ls -A ${LDAP_CONFIG_DIR} | sed  "s/lost+found//")" ]; then
     log-helper error "Error: the database directory (${LDAP_BACKEND_DIR}) is empty but not the config directory (${LDAP_CONFIG_DIR})"
     exit 1
 
   #
   # Error: the config directory is empty but not the database directory
   #
-  elif [ ! -z "$(ls -A ${LDAP_BACKEND_DIR})" ] && [ -z "$(ls -A ${LDAP_CONFIG_DIR})" ]; then
+  elif [ ! -z "$(ls -A ${LDAP_BACKEND_DIR} | sed  "s/lost+found//")" ] && [ -z "$(ls -A ${LDAP_CONFIG_DIR} | sed  "s/lost+found//")" ]; then
     log-helper error "Error: the config directory (${LDAP_CONFIG_DIR}) is empty but not the database directory (${LDAP_BACKEND_DIR})"
     exit 1
   fi
@@ -158,17 +164,18 @@ if [ ! -e "$FIRST_START_DONE" ]; then
     [ -f ${PREVIOUS_LDAP_TLS_DH_PARAM_PATH} ] || openssl dhparam -out ${LDAP_TLS_DH_PARAM_PATH} 2048
 
     chmod 600 ${PREVIOUS_LDAP_TLS_DH_PARAM_PATH}
-    chown openldap:openldap $PREVIOUS_LDAP_TLS_CRT_PATH $PREVIOUS_LDAP_TLS_KEY_PATH $PREVIOUS_LDAP_TLS_CA_CRT_PATH $PREVIOUS_LDAP_TLS_DH_PARAM_PATH
+    chown ldap:ldap $PREVIOUS_LDAP_TLS_CRT_PATH $PREVIOUS_LDAP_TLS_KEY_PATH $PREVIOUS_LDAP_TLS_CA_CRT_PATH $PREVIOUS_LDAP_TLS_DH_PARAM_PATH
   fi
 
   # start OpenLDAP
   log-helper info "Start OpenLDAP..."
+  fix_file_permissions
 
-  if log-helper level eq debug; then
+  if log-helper level ge debug; then
     # debug
-    slapd -h "ldap://$HOSTNAME $PREVIOUS_HOSTNAME_PARAM ldap://localhost ldapi:///" -u openldap -g openldap -d $LDAP_LOG_LEVEL 2>&1 &
+    slapd -h "ldap://$HOSTNAME $PREVIOUS_HOSTNAME_PARAM ldap://localhost ldapi:///" -u ldap -g ldap -d $LDAP_LOG_LEVEL 2>&1 &
   else
-    slapd -h "ldap://$HOSTNAME $PREVIOUS_HOSTNAME_PARAM ldap://localhost ldapi:///" -u openldap -g openldap
+    slapd -h "ldap://$HOSTNAME $PREVIOUS_HOSTNAME_PARAM ldap://localhost ldapi:///" -u ldap -g ldap
   fi
 
 
@@ -181,9 +188,6 @@ if [ ! -e "$FIRST_START_DONE" ]; then
   if $BOOTSTRAP; then
 
     log-helper info "Add bootstrap schemas..."
-
-    # add ppolicy schema
-    ldapadd -c -Y EXTERNAL -Q -H ldapi:/// -f /etc/ldap/schema/ppolicy.ldif 2>&1 | log-helper debug
 
     # convert schemas to ldif
     SCHEMAS=""
@@ -279,7 +283,7 @@ if [ ! -e "$FIRST_START_DONE" ]; then
     chmod 600 ${LDAP_TLS_DH_PARAM_PATH}
 
     # fix file permissions
-    chown -R openldap:openldap ${CONTAINER_SERVICE_DIR}/slapd
+    chown -R ldap:ldap ${CONTAINER_SERVICE_DIR}/slapd
 
     # adapt tls ldif
     sed -i "s|{{ LDAP_TLS_CA_CRT_PATH }}|${LDAP_TLS_CA_CRT_PATH}|g" ${CONTAINER_SERVICE_DIR}/slapd/assets/config/tls/tls-enable.ldif

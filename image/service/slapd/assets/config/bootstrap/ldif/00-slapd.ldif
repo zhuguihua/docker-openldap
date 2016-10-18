@@ -36,7 +36,7 @@ dn: cn=module{0},cn=config
 objectClass: olcModuleList
 cn: module{0}
 olcModulePath: {{ LDAP_MODULES_DIR }}
-olcModuleLoad: {0}back_{{ LDAP_BACKEND_DATABASE }}
+olcModuleLoad: {0}back_{{ LDAP_BACKEND }}
 
 #
 # SCHEMATA
@@ -103,15 +103,15 @@ olcAccess: to * by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=a
 #
 # BACKENDS
 #
-dn: olcBackend={{ LDAP_BACKEND_DATABASE }},cn=config
+dn: olcBackend={{ LDAP_BACKEND }},cn=config
 objectClass: olcBackendConfig
-olcBackend: {{ LDAP_BACKEND_DATABASE }}
+olcBackend: {{ LDAP_BACKEND }}
 
 # BACKEND DATABASE
-dn: olcDatabase={{ LDAP_BACKEND_DATABASE }},cn=config
+dn: olcDatabase={{ LDAP_BACKEND }},cn=config
 objectClass: olcDatabaseConfig
 objectClass: {{ LDAP_BACKEND_OBJECTCLASS }}
-olcDatabase: {{ LDAP_BACKEND_DATABASE }}
+olcDatabase: {{ LDAP_BACKEND }}
 olcDbCheckpoint: 512 30
 olcLastMod: TRUE
 olcSuffix: {{ LDAP_BASE_DN }}
