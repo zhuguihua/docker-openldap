@@ -18,7 +18,9 @@ RUN apk update \
        openldap-clients \
        openldap-mqtt \
        openssl \
-    && rm -rf /var/cache/apk/*
+       slapd \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Add service directory to /container/service
 ADD service /container/service
